@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1784838866535,
+      "tag": "0000_perfect_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1784839316962,
+      "tag": "0001_new_the_professor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1784843198702,
+      "tag": "0002_ambitious_omega_flight",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1784928503267,
+      "tag": "0003_strange_supernaut",
+      "breakpoints": true
+    }
+  ]
+}

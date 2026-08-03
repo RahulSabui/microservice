@@ -1,0 +1,199 @@
+version: "3.8"
+
+services:
+
+  # =========================
+  # DATABASES
+  # =========================
+
+  mysql-auth:
+    image: mysql:8
+    container_name: mysql-auth
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - auth_mysql_data:/var/lib/mysql
+
+
+  mysql-doctor:
+    image: mysql:8
+    container_name: mysql-doctor
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: doctor_db
+
+    ports:
+      - "3308:3306"
+
+    volumes:
+      - doctor_mysql_data:/var/lib/mysql
+
+
+  mysql-appointment:
+    image: mysql:8
+    container_name: mysql-appointment
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appointment_db
+
+    ports:
+      - "3309:3306"
+
+    volumes:
+      - appointment_mysql_data:/var/lib/mysql
+
+
+
+  # =========================
+  # AUTH SERVICE
+  # =========================
+
+  auth-service:
+
+    build:
+      context: ./auth-service
+
+    container_name: auth-service
+
+    restart: always
+
+    ports:
+      - "3001:3001"
+
+    depends_on:
+      - mysql-auth
+
+    environment:
+      PORT: 3001
+
+      DB_HOST: mysql-auth
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: auth_db
+
+
+
+  # =========================
+  # DOCTOR SERVICE
+  # =========================
+
+  doctor-service:
+
+    build:
+      context: ./doctor-service
+
+    container_name: doctor-service
+
+    restart: always
+
+    ports:
+      - "3002:3002"
+
+    depends_on:
+      - mysql-doctor
+      - auth-service
+
+
+    environment:
+      PORT: 3002
+
+      DB_HOST: mysql-doctor
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: doctor_db
+
+      AUTH_SERVICE: http://auth-service:3001
+
+
+
+  # =========================
+  # APPOINTMENT SERVICE
+  # =========================
+
+  appointment-service:
+
+    build:
+      context: ./appointment-service
+
+    container_name: appointment-service
+
+    restart: always
+
+    ports:
+      - "3003:3003"
+
+    depends_on:
+      - mysql-appointment
+      - auth-service
+      - doctor-service
+
+
+    environment:
+      PORT: 3003
+
+      DB_HOST: mysql-appointment
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: appointment_db
+
+      AUTH_SERVICE: http://auth-service:3001
+      DOCTOR_SERVICE: http://doctor-service:3002
+
+
+
+  # =========================
+  # API GATEWAY
+  # =========================
+
+  api-gateway:
+
+    build:
+      context: ./api-gateway
+
+    container_name: api-gateway
+
+    restart: always
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - auth-service
+      - doctor-service
+      - appointment-service
+
+
+    environment:
+      PORT: 3000
+
+      AUTH_SERVICE: http://auth-service:3001
+      DOCTOR_SERVICE: http://doctor-service:3002
+      APPOINTMENT_SERVICE: http://appointment-service:3003
+
+
+
+# =========================
+# MYSQL VOLUMES
+# =========================
+
+volumes:
+
+  auth_mysql_data:
+
+  doctor_mysql_data:
+
+  appointment_mysql_data:

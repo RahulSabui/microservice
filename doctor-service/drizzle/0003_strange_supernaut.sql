@@ -1,0 +1,1 @@
+ALTER TABLE `doctors` ADD `is_available` boolean DEFAULT true NOT NULL;
